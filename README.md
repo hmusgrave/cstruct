@@ -31,7 +31,10 @@ class input_event:
     code: int
     value: int
 
-# the decorated classes are still ordinary dataclasses
+# we can initialize an empty struct
+ie = input_event.zero()
+
+# or treat these as ordinary dataclasses
 ie = input_event(
     timeval(1, 2),
     3, 4, 5
@@ -48,12 +51,28 @@ assert input_event.unpack(serialized) == ie
 
 # trailing bytes are ignored
 assert input_event.unpack(serialized*2) == ie
+
+@cstruct('<H>H')  # mixed alignment is supported
+@dataclass
+class foo:
+    a: int
+    b: int
+
+@cstruct(foo, 'l')
+@dataclass
+class bar:
+    a: foo
+    b: int
+
+def test_padding():
+    assert foo.size == 4
+
+    #   4 bytes of bar.a
+    # + 4 bytes of padding to meet bar.b alignment
+    # + 8 bytes of bar.b
+    assert bar.size == 16
 ```
 
 ## Notes
 
-- The `pack`, `unpack`, and `size` fields of the decorated class are reserved for
-use by `cstruct`.
-- Low alignment nested structs followed by higher alignment fields aren't yet
-  supported.
-
+- The `pack`, `unpack`, `size`, `alignment`, and `zero` fields of the decorated class are reserved for use by `cstruct`.
