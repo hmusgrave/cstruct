@@ -25,7 +25,7 @@ class timeval:
 class input_event:
     # nested struct, defined above
     time: timeval
-    
+
     # other primitive fields
     event_type: int
     code: int
@@ -53,7 +53,7 @@ assert input_event.unpack(serialized) == ie
 assert input_event.unpack(serialized*2) == ie
 
 @cstruct('<H>H')  # mixed alignment is supported
-@dataclass
+@dataclass(order=True)  # you have full control over what the dataclass looks like
 class foo:
     a: int
     b: int
